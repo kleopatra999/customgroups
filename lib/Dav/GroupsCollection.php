@@ -36,21 +36,14 @@ class GroupsCollection implements ICollection {
 	 *
 	 * @var CustomGroupsDatabaseHandler
 	 */
-	private $groupsHandler;
+	protected $groupsHandler;
 
 	/**
 	 * Membership helper
 	 *
 	 * @var MembershipHelper
 	 */
-	private $helper;
-
-	/**
-	 * User id for which to use memberships or null for all groups
-	 *
-	 * @var string
-	 */
-	private $userId;
+	protected $helper;
 
 	/**
 	 * Constructor
@@ -60,12 +53,10 @@ class GroupsCollection implements ICollection {
 	 */
 	public function __construct(
 		CustomGroupsDatabaseHandler $groupsHandler,
-		MembershipHelper $helper,
-		$userId = null
+		MembershipHelper $helper
 	) {
 		$this->groupsHandler = $groupsHandler;
 		$this->helper = $helper;
-		$this->userId = $userId;
 	}
 
 	/**
@@ -116,11 +107,7 @@ class GroupsCollection implements ICollection {
 	 * @return GroupMembershipCollection[] custom group nodes
 	 */
 	public function getChildren() {
-		if ($this->userId !== null) {
-			$allGroups = $this->groupsHandler->getUserMemberships($this->userId);
-		} else {
-			$allGroups = $this->groupsHandler->getGroups();
-		}
+		$allGroups = $this->groupsHandler->getGroups();
 		return array_map(function ($groupInfo) {
 			return $this->createMembershipsCollection($groupInfo);
 		}, $allGroups);
@@ -153,9 +140,6 @@ class GroupsCollection implements ICollection {
 	 * @return string node name
 	 */
 	public function getName() {
-		if ($this->userId !== null) {
-			return $this->userId;
-		}
 		return 'groups';
 	}
 
@@ -184,7 +168,7 @@ class GroupsCollection implements ICollection {
 	 * @param array $groupInfo group info
 	 * @return GroupMembershipCollection node
 	 */
-	private function createMembershipsCollection(array $groupInfo) {
+	protected function createMembershipsCollection(array $groupInfo) {
 		return new GroupMembershipCollection(
 			$groupInfo,
 			$this->groupsHandler,
